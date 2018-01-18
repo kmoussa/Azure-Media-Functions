@@ -11,9 +11,9 @@ using System.Net.Http;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 
-namespace MigrateAWSAssets
+namespace AzureMediaFunctions
 {
-    public static class upatemigrationstatus
+    public static class UpdateMigrationStatus
     {
         // Read values from the App.config file.
         private static readonly string _storageAccountName = Environment.GetEnvironmentVariable("MediaServicesStorageAccountName");

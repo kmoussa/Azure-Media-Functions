@@ -8,7 +8,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.WindowsAzure.MediaServices.Client;
 
-namespace MigrateAWSAssets
+namespace AzureMediaFunctions
 {
     public static class GetAssetUrl
     {
