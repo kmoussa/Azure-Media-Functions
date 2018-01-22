@@ -11,7 +11,6 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
 using System.Data;
 using System.Data.Sql;
-using shahidtelemetryModel;
 using Microsoft.IdentityModel.Protocols;
 using System.Data.SqlClient;
 using System.Text;
