@@ -51,8 +51,6 @@ namespace AzureMediaFunctions
             IAssetFile file = asset.AssetFiles.Create(fileName);
             file.Asset.AlternateId = alternateId;
             asset.Update();
-            //accessPolicy = _context.AccessPolicies.Create(file.Id, TimeSpan.FromDays(2.0), AccessPermissions.Write);
-              //string containerName = new Uri(_context.Locators.CreateLocator(LocatorType.Sas, asset, accessPolicy, null, file.Id.ToString()).Path).Segments[1];
             string containerName = "asset-" + asset.Id.Replace("nb:cid:UUID:","");
             CloudBlobContainer containerReference = new CloudStorageAccount(new StorageCredentials(targetStorage, targetStorageKey), true).CreateCloudBlobClient().GetContainerReference(containerName);
             containerReference.CreateIfNotExists(null, null);
