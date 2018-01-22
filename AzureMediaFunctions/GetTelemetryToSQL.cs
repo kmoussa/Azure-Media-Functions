@@ -36,7 +36,7 @@ namespace AzureMediaFunctions
         [FunctionName("GetTelemetryToSQL")]
         public static async System.Threading.Tasks.Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = "")]HttpRequestMessage req, TraceWriter log)
         {
-            log.Info("C# HTTP trigger function processed a request.");
+            log.Info("Migration function has been triggered.");
             try
             {
                 // Parse the connection string and return a reference to the storage account.
