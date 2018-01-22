@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,8 @@ using System.Data;
 using System.Data.Sql;
 using shahidtelemetryModel;
 using Microsoft.IdentityModel.Protocols;
+using System.Data.SqlClient;
+using System.Text;
 
 namespace AzureMediaFunctions
 {
@@ -36,30 +39,29 @@ namespace AzureMediaFunctions
             log.Info("C# HTTP trigger function processed a request.");
             try
             {
-                 string connString = ConfigurationManager.ConnectionStrings["shahidtelemetryEntities"].ConnectionString;
-
-                 shahidtelemetryEntities db = new shahidtelemetryEntities(connString);
-                // Fetching the name from the path parameter in the request URL
-
                 // Parse the connection string and return a reference to the storage account.
                 storageAccount = CloudStorageAccount.Parse(storageconnectionstring);
 
+
+              
                 // Create the table client.
 
                 tableClient = storageAccount.CreateCloudTableClient();
-
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("select top 1 * from streamingdata order by timestamp desc");
+               DataSet ds = CreateCommand(sb.ToString(), sqlconnectionstring, true);
 
                 //check if the table has data 
-                if (db.StreamingDatas.Count() > 0)
+                if (ds.Tables[0].Rows.Count > 0)
                 {
                     //check for the latest table migration
-                    StreamingData sd = db.StreamingDatas.OrderByDescending(x => x.TimeStamp).First();
-                    DateTime newTS = DateTime.Parse(sd.TimeStamp.ToString().Split(' ')[0]);
+                    string timestamp = ds.Tables[0].Rows[0][3].ToString();
+                    DateTime newTS = DateTime.Parse(timestamp.Split(' ')[0]);
                     string compareTS = newTS.ToString("yyyyMMdd").Replace("/", "");
                     IEnumerable<CloudTable> tables = tableClient.ListTables("TelemetryMetrics").
                         Where(x => int.Parse(x.Name.Split('s')[1]) >= int.Parse(compareTS));
 
-                    copyTelemtery(tables, sd.TimeStamp, "TelemetryMetrics" + compareTS, log);
+                    copyTelemtery(tables,DateTimeOffset.Parse(timestamp), "TelemetryMetrics" + compareTS, log);
                 }
                 else
                 {
@@ -78,6 +80,38 @@ namespace AzureMediaFunctions
             }
             return req.CreateResponse(HttpStatusCode.OK);
 
+        }
+        private static DataSet CreateCommand(string queryString,
+    string connectionString,bool select)
+        {
+            using (SqlConnection connection = new SqlConnection(
+                       connectionString))
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand();
+                command.Connection = connection;
+                command.CommandText = queryString;
+                DataSet ds = new DataSet();
+                if (select)
+                {
+                    SqlDataAdapter sda = new SqlDataAdapter();
+                    sda.SelectCommand = command;
+                    sda.Fill(ds);
+                    command.Dispose();
+                    connection.Dispose();
+                    return ds;
+                }
+                else
+                {
+                    command.ExecuteNonQuery();
+                    command.Dispose();
+                    connection.Dispose();
+                    return null;
+                }
+                 
+               
+            }
+            
         }
         public static void copyTelemtery(IEnumerable<CloudTable> tables, DateTimeOffset? lastdate, string tablename, TraceWriter log)
         {
@@ -101,35 +135,34 @@ namespace AzureMediaFunctions
                             log.Info("Reading Table " + table.Name);
                             log.Info("Found " +T.Count() + " records inside");
                             int count = 0;
+                            StringBuilder sb = new StringBuilder();
+                          
+                            
                             foreach (var item in T)
                             {
 
-                                StreamingData sd = new StreamingData();
-                                sd.PartitionKey = item.PartitionKey;
-                                sd.RowKey = item.RowKey;
-                                sd.TimeStamp = item.Timestamp;
-
-                                sd.ObservationTime = DateTime.Parse(item.ObservedTime.ToString());
-
-
-                                sd.Type = item.Type;
-                                sd.Name = item.Name;
-                                sd.ServiceId = item.ServiceId;
-
-
-                                sd.HostName = item.HostName;
-                                sd.StatusCode = item.StatusCode.ToString();
-                                sd.ResultCode = item.ResultCode;
-
-                                sd.RequestCount = item.RequestCount;
-                                sd.BytesSent = item.BytesSent;
-                                sd.ServerLatency = item.ServerLatency;
-                                sd.E2ELatency = item.E2ELatency;
-
-                                db.StreamingDatas.Add(sd);
-                                db.SaveChanges();
+                                sb.Append("insert into streamingdata (PartitionKey,RowKey,TimeStamp, ObservationTime, Type,Name,ServiceId,HostName,Statuscode,resultcode,requestCount, bytessent,serverlatency,e2elatency) values ('");
+                                sb.Append(item.PartitionKey + "','");
+                                sb.Append(item.RowKey + "',cast('");
+                                sb.Append(item.Timestamp + "' as datetimeoffset),cast('");
+                                
+                                sb.Append(DateTime.Parse(item.ObservedTime.ToString()) + "' as datetime),'");
+                                sb.Append(item.Type + "','");
+                                sb.Append(item.Name + "','");
+                                sb.Append(item.ServiceId + "','");
+                                sb.Append(item.HostName + "','");
+                                sb.Append(item.StatusCode.ToString() + "','");
+                                sb.Append(item.ResultCode + "',");
+                                sb.Append(item.RequestCount + ",");
+                                sb.Append(item.BytesSent + ",");
+                                sb.Append(item.ServerLatency + ",");
+                                sb.Append(item.E2ELatency + ");");
+                                 
+                               
                                 log.Info("inserting entity " + count++ + " from table " + table.Name);
                             }
+                            DataSet ds = CreateCommand(sb.ToString(), sqlconnectionstring, false);
+                            log.Info("Data Submitted successfully in the table ");
                         }
                     }
                     else
@@ -139,30 +172,34 @@ namespace AzureMediaFunctions
                         log.Info("Reading Table " + table.Name);
                         log.Info("Found " + T.Count() + " records inside");
                         int count = 0;
+
+                        StringBuilder sb = new StringBuilder();
                         foreach (var item in T)
                         {
+                            sb.Append("insert into streamingdata (PartitionKey,RowKey,TimeStamp, ObservationTime, Type,Name,ServiceId,HostName,Statuscode,resultcode,requestCount, bytessent,serverlatency,e2elatency) values ('");
+                            sb.Append(item.PartitionKey + "','");
+                            sb.Append(item.RowKey + "',cast('");
+                            sb.Append(item.Timestamp + "' as datetimeoffset),cast('");
+
+                            sb.Append(item.ObservedTime.ToString() + "' as datetime),'");
+                            sb.Append(item.Type + "','");
+                            sb.Append(item.Name + "','");
+                            sb.Append(item.ServiceId + "','");
+                            sb.Append(item.HostName + "','");
+                            sb.Append(item.StatusCode.ToString() + "','");
+                            sb.Append(item.ResultCode + "',");
+                            sb.Append(item.RequestCount + ",");
+                            sb.Append(item.BytesSent + ",");
+                            sb.Append(item.ServerLatency + ",");
+                            sb.Append(item.E2ELatency + ");");
 
 
-                            StreamingData sd = new StreamingData();
-                            sd.PartitionKey = item.PartitionKey;
-                            sd.RowKey = item.RowKey;
-                            sd.TimeStamp = item.Timestamp;
-                            sd.ObservationTime = DateTime.Parse(item.ObservedTime.ToString());
-                            sd.Type = item.Type;
-                            sd.Name = item.Name;
-                            sd.ServiceId = item.ServiceId;
 
-                            sd.HostName = item.HostName;
-                            sd.StatusCode = item.StatusCode.ToString();
-                            sd.ResultCode = item.ResultCode;
-                            sd.RequestCount = item.RequestCount;
-                            sd.BytesSent = item.BytesSent;
-                            sd.ServerLatency = item.ServerLatency;
-                            sd.E2ELatency = item.E2ELatency;
-                            db.StreamingDatas.Add(sd);
-                            db.SaveChanges();
                             log.Info("inserting entity " + count++ + " from table " + table.Name);
-                        }
+                            }
+                            DataSet ds = CreateCommand(sb.ToString(), sqlconnectionstring, false);
+                        log.Info("Data Submitted successfully in the table ");
+
                     }
                     i++;
 
@@ -177,30 +214,32 @@ namespace AzureMediaFunctions
                     log.Info("Reading Table " + table.Name);
                     log.Info("Found " + T.Count() + " records inside");
                     int count = 0;
+                    StringBuilder sb = new StringBuilder();
                     foreach (var item in T)
                     {
+                        sb.Append("insert into streamingdata (PartitionKey,RowKey,TimeStamp, ObservationTime, Type,Name,ServiceId,HostName,Statuscode,resultcode,requestCount, bytessent,serverlatency,e2elatency) values ('");
+                        sb.Append(item.PartitionKey + "','");
+                        sb.Append(item.RowKey + "',cast('");
+                        sb.Append(item.Timestamp + "' as datetimeoffset),cast('");
+
+                        sb.Append(item.ObservedTime.ToString() + "' as datetime),'");
+                        sb.Append(item.Type + "','");
+                        sb.Append(item.Name + "','");
+                        sb.Append(item.ServiceId + "','");
+                        sb.Append(item.HostName + "','");
+                        sb.Append(item.StatusCode.ToString() + "','");
+                        sb.Append(item.ResultCode + "',");
+                        sb.Append(item.RequestCount + ",");
+                        sb.Append(item.BytesSent + ",");
+                        sb.Append(item.ServerLatency + ",");
+                        sb.Append(item.E2ELatency + ");");
 
 
-                        StreamingData sd = new StreamingData();
-                        sd.PartitionKey = item.PartitionKey;
-                        sd.RowKey = item.RowKey;
-                        sd.TimeStamp = item.Timestamp;
-                        sd.ObservationTime = DateTime.Parse(item.ObservedTime.ToString());
-                        sd.Type = item.Type;
-                        sd.Name = item.Name;
-                        sd.ServiceId = item.ServiceId;
 
-                        sd.HostName = item.HostName;
-                        sd.StatusCode = item.StatusCode.ToString();
-                        sd.ResultCode = item.ResultCode;
-                        sd.RequestCount = item.RequestCount;
-                        sd.BytesSent = item.BytesSent;
-                        sd.ServerLatency = item.ServerLatency;
-                        sd.E2ELatency = item.E2ELatency;
-                        db.StreamingDatas.Add(sd);
-                        db.SaveChanges();
                         log.Info("inserting entity " + count++ + " from table " + table.Name);
                     }
+                    DataSet ds = CreateCommand(sb.ToString(), sqlconnectionstring, false);
+                    log.Info("Data Submitted successfully in the table ");
                 }
 
 
