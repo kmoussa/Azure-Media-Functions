@@ -29,7 +29,7 @@ namespace AzureMediaFunctions
         private static string storagekey = Environment.GetEnvironmentVariable("storagekey");
         private static string storagename = Environment.GetEnvironmentVariable("storagename");
         private static string storageconnectionstring = Environment.GetEnvironmentVariable("storageconnectionstring");
-        private static string sqlconnectionstring = Environment.GetEnvironmentVariable("shahidtelemetryEntities");
+        private static string sqlconnectionstring = Environment.GetEnvironmentVariable("DBtelemetryEntities");
         static CloudStorageAccount storageAccount = null;
         static CloudTableClient tableClient = null;
       
