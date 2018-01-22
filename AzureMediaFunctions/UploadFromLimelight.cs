@@ -27,7 +27,7 @@ namespace AzureMediaFunctions
         private static string storagename = Environment.GetEnvironmentVariable("storagename");
 
         [FunctionName("UploadFromLimelight")]
-        public static async System.Threading.Tasks.Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = "uploadfromlimelight")]HttpRequestMessage req, TraceWriter log)
+        public static async System.Threading.Tasks.Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = "")]HttpRequestMessage req, TraceWriter log)
         {
             _context = AzureServicePrincipalAuth();
             log.Info("C# HTTP trigger function processed a request.");
@@ -35,8 +35,11 @@ namespace AzureMediaFunctions
             dynamic data = JsonConvert.DeserializeObject(jsonContent);
 
             log.Info(jsonContent);
-            UriBuilder u = new UriBuilder(data.url);
-           string output =  CopyAssetToAzure(_context, u.Uri, data.file_name, data.file_name, storagename, storagekey, data.shahid_media_id, AssetCreationOptions.None);
+            string url = data.url;
+            string filename = data.file_name;
+            string shahidmediaid = data.shahid_media_id;
+            UriBuilder u = new UriBuilder(url);
+            string output =  CopyAssetToAzure(_context, u.Uri, filename, filename, storagename, storagekey, shahidmediaid, AssetCreationOptions.None);
             // Fetching the name from the path parameter in the request URL
             return req.CreateResponse(HttpStatusCode.OK,output);
         }
@@ -47,8 +50,10 @@ namespace AzureMediaFunctions
             asset.AlternateId = alternateId;
             IAssetFile file = asset.AssetFiles.Create(fileName);
             file.Asset.AlternateId = alternateId;
-            accessPolicy = _context.AccessPolicies.Create(file.Id, TimeSpan.FromDays(2.0), AccessPermissions.Write);
-            string containerName = new Uri(_context.Locators.CreateLocator(LocatorType.Sas, asset, accessPolicy, null, file.Id.ToString()).Path).Segments[1];
+            asset.Update();
+            //accessPolicy = _context.AccessPolicies.Create(file.Id, TimeSpan.FromDays(2.0), AccessPermissions.Write);
+              //string containerName = new Uri(_context.Locators.CreateLocator(LocatorType.Sas, asset, accessPolicy, null, file.Id.ToString()).Path).Segments[1];
+            string containerName = "asset-" + asset.Id.Replace("nb:cid:UUID:","");
             CloudBlobContainer containerReference = new CloudStorageAccount(new StorageCredentials(targetStorage, targetStorageKey), true).CreateCloudBlobClient().GetContainerReference(containerName);
             containerReference.CreateIfNotExists(null, null);
             containerReference.GetBlockBlobReference(fileName);

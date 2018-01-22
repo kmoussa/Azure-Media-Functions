@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="shahidtelemetryModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012.Azure" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="StreamingData">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PartitionKey" Type="nvarchar" MaxLength="100" />
+          <Property Name="RowKey" Type="nvarchar" MaxLength="50" />
+          <Property Name="TimeStamp" Type="datetimeoffset" Precision="7" />
+          <Property Name="Type" Type="nvarchar" MaxLength="50" />
+          <Property Name="Name" Type="nvarchar" MaxLength="150" />
+          <Property Name="ObservationTime" Type="datetime" />
+          <Property Name="ServiceId" Type="uniqueidentifier" />
+          <Property Name="HostName" Type="nvarchar" MaxLength="200" />
+          <Property Name="StatusCode" Type="nvarchar" MaxLength="20" />
+          <Property Name="ResultCode" Type="nvarchar" MaxLength="100" />
+          <Property Name="RequestCount" Type="int" />
+          <Property Name="BytesSent" Type="bigint" />
+          <Property Name="ServerLatency" Type="bigint" />
+          <Property Name="E2ELatency" Type="bigint" />
+        </EntityType>
+        <EntityContainer Name="shahidtelemetryModelStoreContainer">
+          <EntitySet Name="StreamingData" EntityType="Self.StreamingData" Schema="dbo" store:Type="Tables" />
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="shahidtelemetryModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="StreamingData">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PartitionKey" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="RowKey" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="TimeStamp" Type="DateTimeOffset" Precision="7" />
+          <Property Name="Type" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Name" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
+          <Property Name="ObservationTime" Type="DateTime" Precision="3" />
+          <Property Name="ServiceId" Type="Guid" />
+          <Property Name="HostName" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="StatusCode" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="ResultCode" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="RequestCount" Type="Int32" />
+          <Property Name="BytesSent" Type="Int64" />
+          <Property Name="ServerLatency" Type="Int64" />
+          <Property Name="E2ELatency" Type="Int64" />
+        </EntityType>
+        <EntityContainer Name="shahidtelemetryEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="StreamingDatas" EntityType="Self.StreamingData" />
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="shahidtelemetryModelStoreContainer" CdmEntityContainer="shahidtelemetryEntities">
+          <EntitySetMapping Name="StreamingDatas">
+            <EntityTypeMapping TypeName="shahidtelemetryModel.StreamingData">
+              <MappingFragment StoreEntitySet="StreamingData">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="PartitionKey" ColumnName="PartitionKey" />
+                <ScalarProperty Name="RowKey" ColumnName="RowKey" />
+                <ScalarProperty Name="TimeStamp" ColumnName="TimeStamp" />
+                <ScalarProperty Name="Type" ColumnName="Type" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ObservationTime" ColumnName="ObservationTime" />
+                <ScalarProperty Name="ServiceId" ColumnName="ServiceId" />
+                <ScalarProperty Name="HostName" ColumnName="HostName" />
+                <ScalarProperty Name="StatusCode" ColumnName="StatusCode" />
+                <ScalarProperty Name="ResultCode" ColumnName="ResultCode" />
+                <ScalarProperty Name="RequestCount" ColumnName="RequestCount" />
+                <ScalarProperty Name="BytesSent" ColumnName="BytesSent" />
+                <ScalarProperty Name="ServerLatency" ColumnName="ServerLatency" />
+                <ScalarProperty Name="E2ELatency" ColumnName="E2ELatency" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
