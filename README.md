@@ -20,4 +20,4 @@ I built a simple Azure Logic App with a recurrence trigger for that runs every m
 This function help you update alternativeId for an Asset in Azure Media Services.
 
 <b>- UploadFromLimeLight</b>
-This function helps migrating assets from LimeLight to Azure Media Services, We need to integrate it with Azure media functions under this git rep.
+This function helps migrating assets from LimeLight to Azure Media Services, We need to integrate it with Azure media functions under this <a href='https://github.com/xpouyat/media-services-dotnet-functions-integration/tree/master/media-functions-for-logic-app'>git rep</a>.
