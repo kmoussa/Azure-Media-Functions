@@ -29,23 +29,28 @@ namespace AzureMediaFunctions
         [FunctionName("UploadFromLimelight")]
         public static async System.Threading.Tasks.Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = "")]HttpRequestMessage req, TraceWriter log)
         {
+            //authenticating with Azure Media Services
             _context = AzureServicePrincipalAuth();
-            log.Info("C# HTTP trigger function processed a request.");
+            log.Info("UploadFromLimeLight function started...");
+            //reading the input payload...
             string jsonContent = await req.Content.ReadAsStringAsync();
             dynamic data = JsonConvert.DeserializeObject(jsonContent);
 
             log.Info(jsonContent);
+            //limelight URL
             string url = data.url;
+            //limelight asset file name
             string filename = data.file_name;
-            string shahidmediaid = data.shahid_media_id;
+            //limelight asset id.
+            string mediaId = data.shahid_media_id;
             UriBuilder u = new UriBuilder(url);
-            string output =  CopyAssetToAzure(_context, u.Uri, filename, filename, storagename, storagekey, shahidmediaid, AssetCreationOptions.None);
-            // Fetching the name from the path parameter in the request URL
+            string output =  CopyAssetToAzure(_context, u.Uri, filename, filename, storagename, storagekey, mediaId, AssetCreationOptions.None);
+   
             return req.CreateResponse(HttpStatusCode.OK,output);
         }
         private static string CopyAssetToAzure(CloudMediaContext _context, Uri ObjectUrl, string assetname, string fileName, string targetStorage, string targetStorageKey, string alternateId, AssetCreationOptions o)
         {
-            IAccessPolicy accessPolicy = null;
+            
             IAsset asset = _context.Assets.Create(assetname, targetStorage, o);
             asset.AlternateId = alternateId;
             IAssetFile file = asset.AssetFiles.Create(fileName);
