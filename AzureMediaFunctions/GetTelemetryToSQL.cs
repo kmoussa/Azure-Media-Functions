@@ -140,24 +140,9 @@ namespace AzureMediaFunctions
                             foreach (var item in T)
                             {
 
-                                sb.Append("insert into streamingdata (PartitionKey,RowKey,TimeStamp, ObservationTime, Type,Name,ServiceId,HostName,Statuscode,resultcode,requestCount, bytessent,serverlatency,e2elatency) values ('");
-                                sb.Append(item.PartitionKey + "','");
-                                sb.Append(item.RowKey + "',cast('");
-                                sb.Append(item.Timestamp + "' as datetimeoffset),cast('");
-                                
-                                sb.Append(DateTime.Parse(item.ObservedTime.ToString()) + "' as datetime),'");
-                                sb.Append(item.Type + "','");
-                                sb.Append(item.Name + "','");
-                                sb.Append(item.ServiceId + "','");
-                                sb.Append(item.HostName + "','");
-                                sb.Append(item.StatusCode.ToString() + "','");
-                                sb.Append(item.ResultCode + "',");
-                                sb.Append(item.RequestCount + ",");
-                                sb.Append(item.BytesSent + ",");
-                                sb.Append(item.ServerLatency + ",");
-                                sb.Append(item.E2ELatency + ");");
-                                 
-                               
+                                constructQuery(item, sb);
+
+
                                 log.Info("inserting entity " + count++ + " from table " + table.Name);
                             }
                             DataSet ds = CreateCommand(sb.ToString(), sqlconnectionstring, false);
@@ -175,22 +160,7 @@ namespace AzureMediaFunctions
                         StringBuilder sb = new StringBuilder();
                         foreach (var item in T)
                         {
-                            sb.Append("insert into streamingdata (PartitionKey,RowKey,TimeStamp, ObservationTime, Type,Name,ServiceId,HostName,Statuscode,resultcode,requestCount, bytessent,serverlatency,e2elatency) values ('");
-                            sb.Append(item.PartitionKey + "','");
-                            sb.Append(item.RowKey + "',cast('");
-                            sb.Append(item.Timestamp + "' as datetimeoffset),cast('");
-
-                            sb.Append(item.ObservedTime.ToString() + "' as datetime),'");
-                            sb.Append(item.Type + "','");
-                            sb.Append(item.Name + "','");
-                            sb.Append(item.ServiceId + "','");
-                            sb.Append(item.HostName + "','");
-                            sb.Append(item.StatusCode.ToString() + "','");
-                            sb.Append(item.ResultCode + "',");
-                            sb.Append(item.RequestCount + ",");
-                            sb.Append(item.BytesSent + ",");
-                            sb.Append(item.ServerLatency + ",");
-                            sb.Append(item.E2ELatency + ");");
+                            constructQuery(item, sb);
 
 
 
@@ -216,23 +186,8 @@ namespace AzureMediaFunctions
                     StringBuilder sb = new StringBuilder();
                     foreach (var item in T)
                     {
-                        sb.Append("insert into streamingdata (PartitionKey,RowKey,TimeStamp, ObservationTime, Type,Name,ServiceId,HostName,Statuscode,resultcode,requestCount, bytessent,serverlatency,e2elatency) values ('");
-                        sb.Append(item.PartitionKey + "','");
-                        sb.Append(item.RowKey + "',cast('");
-                        sb.Append(item.Timestamp + "' as datetimeoffset),cast('");
 
-                        sb.Append(item.ObservedTime.ToString() + "' as datetime),'");
-                        sb.Append(item.Type + "','");
-                        sb.Append(item.Name + "','");
-                        sb.Append(item.ServiceId + "','");
-                        sb.Append(item.HostName + "','");
-                        sb.Append(item.StatusCode.ToString() + "','");
-                        sb.Append(item.ResultCode + "',");
-                        sb.Append(item.RequestCount + ",");
-                        sb.Append(item.BytesSent + ",");
-                        sb.Append(item.ServerLatency + ",");
-                        sb.Append(item.E2ELatency + ");");
-
+                        constructQuery(item, sb);
 
 
                         log.Info("inserting entity " + count++ + " from table " + table.Name);
@@ -245,6 +200,26 @@ namespace AzureMediaFunctions
             }
 
 
+        }
+        public static StringBuilder constructQuery(TelemetryEntity item,StringBuilder sb)
+        {
+            sb.Append("insert into streamingdata (PartitionKey,RowKey,TimeStamp, ObservationTime, Type,Name,ServiceId,HostName,Statuscode,resultcode,requestCount, bytessent,serverlatency,e2elatency) values ('");
+            sb.Append(item.PartitionKey + "','");
+            sb.Append(item.RowKey + "',cast('");
+            sb.Append(item.Timestamp + "' as datetimeoffset),cast('");
+
+            sb.Append(item.ObservedTime.ToString() + "' as datetime),'");
+            sb.Append(item.Type + "','");
+            sb.Append(item.Name + "','");
+            sb.Append(item.ServiceId + "','");
+            sb.Append(item.HostName + "','");
+            sb.Append(item.StatusCode.ToString() + "','");
+            sb.Append(item.ResultCode + "',");
+            sb.Append(item.RequestCount + ",");
+            sb.Append(item.BytesSent + ",");
+            sb.Append(item.ServerLatency + ",");
+            sb.Append(item.E2ELatency + ");");
+            return sb;
         }
     }
     public class TelemetryEntity : TableEntity
