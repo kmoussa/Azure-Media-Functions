@@ -208,7 +208,7 @@ namespace AzureMediaFunctions
             sb.Append(item.RowKey + "',cast('");
             sb.Append(item.Timestamp + "' as datetimeoffset),cast('");
 
-            sb.Append(item.ObservedTime.ToString() + "' as datetime),'");
+            sb.Append(DateTime.Parse(item.ObservedTime.ToString()) + "' as datetime),'");
             sb.Append(item.Type + "','");
             sb.Append(item.Name + "','");
             sb.Append(item.ServiceId + "','");
@@ -264,7 +264,7 @@ namespace AzureMediaFunctions
 
         public int RequestCount { get; set; }
 
-        public int BytesSent { get; set; }
+        public Int64 BytesSent { get; set; }
 
         public int ServerLatency { get; set; }
 
